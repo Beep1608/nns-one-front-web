@@ -1,0 +1,9 @@
+{
+  "USERS": {
+    "TITLE": "Gestión de Usuarios",
+    "COLUMN_USERNAME": "Nombre de usuario",
+    "COLUMN_ACCESS": "Accesos",
+    "COLUMN_LAST_ACTIVE": "Última actividad",
+    "ACTIONS": "Acciones"
+  }
+}
