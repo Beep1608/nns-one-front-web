@@ -4,15 +4,12 @@ import { NzIconModule } from "ng-zorro-antd/icon";
 import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzPageHeaderModule } from "ng-zorro-antd/page-header";
 import { NzTableModule } from "ng-zorro-antd/table";
-import { UserService } from "../services/user.service";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { NzTagModule } from "ng-zorro-antd/tag";
-import { NgClass } from "@angular/common";
 import { PERMISSION_COLORS } from "../shared/constants/permissions.constants";
 import { NzDropdownModule } from "ng-zorro-antd/dropdown";
 import { NzMenuModule } from "ng-zorro-antd/menu";
 import { ROLES_COLORS } from "../shared/constants/roles.constans";
-import { UserModel } from "../models/user.model";
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { NzSpaceModule } from "ng-zorro-antd/space";
@@ -24,6 +21,8 @@ import { FormsModule } from "@angular/forms";
 import { NzInputModule } from "ng-zorro-antd/input";
 import { ProductModel } from "../models/product.model";
 import { ProductService } from "../services/product.service";
+import { NzButtonModule } from "ng-zorro-antd/button";
+import { Router } from "@angular/router";
 
 
 
@@ -46,11 +45,14 @@ import { ProductService } from "../services/product.service";
     NzAutocompleteModule,
     NzInputModule,
     FormsModule,
+    NzButtonModule
   ],
   templateUrl: './products-management.html',
   styleUrl: './products-management.css',
 })
 export class ProductsManagement {
+
+  constructor(private router: Router){}
   listOfCurrentPageProducts: readonly ProductModel[] = [];
 
   private productService = inject(ProductService);
@@ -99,5 +101,10 @@ export class ProductsManagement {
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.inputValue.set(value);
+  }
+
+  test(event: any): void { // Cambia MouseEvent por any solo para probar
+    console.log("Miaui");
+    this.router.navigate(['/products-create'])
   }
 }

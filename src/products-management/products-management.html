@@ -37,7 +37,7 @@
         <span class="text-gray-500 font-medium">{{ products().length }}</span>
         </div>
 
-        <div class="w-64">
+        <div class="w-64 flex gap-2">
           <nz-input-wrapper>
             <input
               placeholder="Search users"
@@ -53,6 +53,11 @@
             [nzDataSource]="options()"
             nzBackfill>
           </nz-autocomplete>
+
+          <button nz-button nzType="primary" nzSize="large" nzShape="round" (click)="test($event)">
+            <span>Add new user</span>
+            <nz-icon nzType="plus-circle" nzTheme="outline" />
+          </button>
         </div>
 
 
