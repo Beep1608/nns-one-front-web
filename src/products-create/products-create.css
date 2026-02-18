@@ -1,0 +1,35 @@
+.container {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.header p {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.row-flex {
+  display: flex;
+  gap: 16px;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.w-full {
+  width: 100%;
+}
+
+/* Ajuste para que el input de Ant Design ocupe todo el ancho */
+nz-input-number {
+  width: 100%;
+}
