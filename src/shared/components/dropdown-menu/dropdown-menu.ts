@@ -1,8 +1,10 @@
 import {
     Component,
+    DestroyRef,
     ElementRef,
     HostListener,
     ViewChild,
+    inject,
     input,
     signal,
 } from '@angular/core';
@@ -47,11 +49,16 @@ export class DropdownMenu {
     isOpen = signal(false);
     menuTop = signal(0);
     menuLeft = signal(0);
+    private removeResizeListener?: () => void;
+    private removeScrollListener?: () => void;
+    private readonly destroyRef = inject(DestroyRef);
 
     @ViewChild('triggerButton', { read: ElementRef }) triggerButton?: ElementRef<HTMLButtonElement>;
     @ViewChild('menuPanel', { read: ElementRef }) menuPanel?: ElementRef<HTMLDivElement>;
 
-    constructor(private el: ElementRef) { }
+    constructor(private el: ElementRef) {
+        this.destroyRef.onDestroy(() => this.removeWindowListeners());
+    }
 
     toggle(): void {
         if (this.isOpen()) {
@@ -60,33 +67,53 @@ export class DropdownMenu {
         }
 
         this.isOpen.set(true);
+        this.bindWindowListeners();
         requestAnimationFrame(() => this.positionMenu());
         setTimeout(() => this.positionMenu(), 0);
     }
 
     close(): void {
         this.isOpen.set(false);
-    }
-
-    @HostListener('window:resize')
-    onWindowResize(): void {
-        if (this.isOpen()) {
-            this.positionMenu();
-        }
-    }
-
-    @HostListener('window:scroll')
-    onWindowScroll(): void {
-        if (this.isOpen()) {
-            this.positionMenu();
-        }
+        this.removeWindowListeners();
     }
 
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: MouseEvent): void {
         if (!this.el.nativeElement.contains(event.target)) {
             this.isOpen.set(false);
+            this.removeWindowListeners();
         }
+    }
+
+    private bindWindowListeners(): void {
+        this.removeWindowListeners();
+
+        const handleResize = () => {
+            if (this.isOpen()) {
+                this.positionMenu();
+            }
+        };
+
+        const handleScroll = () => {
+            if (this.isOpen()) {
+                // Closing on scroll avoids expensive reposition work on every tick
+                // across large table lists and prevents scroll jank.
+                this.close();
+            }
+        };
+
+        window.addEventListener('resize', handleResize, { passive: true });
+        document.addEventListener('scroll', handleScroll, true);
+
+        this.removeResizeListener = () => window.removeEventListener('resize', handleResize);
+        this.removeScrollListener = () => document.removeEventListener('scroll', handleScroll, true);
+    }
+
+    private removeWindowListeners(): void {
+        this.removeResizeListener?.();
+        this.removeResizeListener = undefined;
+        this.removeScrollListener?.();
+        this.removeScrollListener = undefined;
     }
 
     private positionMenu(): void {
