@@ -1,8 +1,14 @@
 export interface UserDto {
-  id: number;
+  id?: number;
+  userId?: number;
   username: string;
-  createdAt: string;
-  lastActiveAt: string;
-  permissions: Set<string>;
-  roles: Set<string>;
+  createdAt: string | null;
+  lastActiveAt: string | null;
+  permissions?: string[] | Set<string>;
+  roles?: string[] | Set<string>;
+  _links?: {
+    self?: {
+      href?: string;
+    };
+  };
 }

@@ -1,9 +1,3 @@
-nz-header {
-  background: #ffffff;
+:host {
+  display: block;
 }
-
-.permissions-tag{
-
-  border-radius:5px;
-}
-

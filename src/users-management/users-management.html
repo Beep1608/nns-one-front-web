@@ -1,144 +1,122 @@
+<app-page-header title="User Management" subtitle="Manage team accounts, permissions, and role assignments.">
+  <button
+    type="button"
+    class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white
+           shadow-sm shadow-primary-700/30 transition hover:bg-primary-700"
+    (click)="navigateToCreate()">
+    <i class="fa-solid fa-user-plus"></i>
+    Create user
+  </button>
+</app-page-header>
 
-<nz-layout>
-  <nz-sider nzTheme="light">
-    Sider
-  </nz-sider>
-  <nz-layout>
-    <nz-header>
-      <nz-breadcrumb>
-        <nz-breadcrumb-item>
-          <nz-icon nzType="home" />
-        </nz-breadcrumb-item>
-        <nz-breadcrumb-item>
-          <a>
-            <nz-icon nzType="user" />
-            <span i18n>Application List</span>
-          </a>
-        </nz-breadcrumb-item>
-        <nz-breadcrumb-item i18n>Application</nz-breadcrumb-item>
-      </nz-breadcrumb>
-
-    </nz-header>
-    <nz-content>
-      <nz-page-header-title i18n>
-        User management
-      </nz-page-header-title>
-      <nz-page-header-content>
-        <div nz-row>
-            <div class="content">
-              <p nz-paragraph>Manage your team members and their account roles and permissions here</p>
-            </div>
-        </div>
-      </nz-page-header-content>
-
-      <div class="flex justify-between items-center w-full mb-4">
-        <div class="flex items-center gap-2">
-        <span class="text-lg font-semibold" i18n>All users</span>
-        <span class="text-gray-500 font-medium">{{ users().length }}</span>
-        </div>
-
-        <div class="w-64">
-          <nz-input-wrapper>
-            <input
-              placeholder="Search users"
-              nz-input
-              [(ngModel)]="inputValue"
-              (ngModelchange)="onInput($event)"
-              [nzAutocomplete]="auto"
-            >
-              <nz-icon nzInputSuffix nzType="search" />
-          </nz-input-wrapper>
-          <nz-autocomplete
-            #auto
-            [nzDataSource]="options()"
-            nzBackfill>
-          </nz-autocomplete>
-        </div>
-
-
+<div class="px-4 pb-8 sm:px-6">
+  <app-card [allowOverflow]="true">
+    <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div class="flex items-center gap-2">
+        <p class="text-lg font-semibold text-slate-900">All users</p>
+        <app-tag color="blue">{{ filteredUsers().length }}</app-tag>
       </div>
-      <nz-table
-        #rowSelectionTable
-        nzShowPagination
-        nzShowSizeChanger
-        [nzPageSizeOptions]="pageSizeOptions"
-        [nzData]="users()"
-        (nzCurrentPageDataChange)="onCurrentPageDataChange($event)"
 
-      >
-        <thead>
-          <tr>
-            <th i18n>Username</th>
-            <th i18n>Permissions</th>
-            <th i18n>Roles</th>
-            <th i18n>Last active</th>
-            <th i18n>Date added</th>
-            <th> </th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (data of rowSelectionTable.data; track data) {
+      <label class="relative w-full md:max-w-xs">
+        <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+        <input
+          type="text"
+          [value]="inputValue()"
+          (input)="onSearchChange($any($event.target).value)"
+          placeholder="Search by username"
+          class="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-3.5 text-sm text-slate-800 outline-none transition
+                 placeholder:text-slate-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100" />
+      </label>
+    </div>
 
-            <tr>
-              <td>
-                {{data.username}}
-              </td>
-              <td>
-                <div class="badge-container">
-                  @for (perm of data.permissions; track perm) {
-                    <nz-tag [nzColor]="getPermissionColor(perm)" [ngClass]="'permissions-tag'">{{perm}}</nz-tag>
-                  }
-                </div>
-              </td>
-              <td>
-                  <div class="badge-container">
-                  @for (role of data.roles; track role) {
-                    <nz-tag [nzColor]="getRoleColor(role)" [ngClass]="'roles-tag'">{{role}}</nz-tag>
-                  }
-                </div>
-              </td>
-              <td>
-                {{data.lastActiveAt}}
-              </td>
-              <td>
-                {{data.createdAt}}
-              </td>
-              <td>
-                <a nz-dropdown [nzDropdownMenu]="menu" nzTrigger="click">
-                  <i class="fa-solid fa-ellipsis-vertical cursor-pointer"></i>
-                </a>
-                <nz-dropdown-menu #menu="nzDropdownMenu">
-                  <ul nz-menu>
-                    <li nz-menu-item (click)="viewUserProfile(data.id)">
-                        <i nz-icon nzType="user"></i>
-                        <span i18n>View profile</span>
-                      </li>
+    @if (loading()) {
+      <div class="space-y-3">
+        @for (row of [1, 2, 3, 4, 5]; track row) {
+          <div class="h-12 animate-pulse rounded-xl bg-slate-100"></div>
+        }
+      </div>
+    } @else if (filteredUsers().length === 0) {
+      <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+        <i class="fa-solid fa-users text-2xl text-slate-400"></i>
+        <p class="mt-3 text-sm font-medium text-slate-700">No users found</p>
+        <p class="mt-1 text-sm text-slate-500">Create a user or try another search term.</p>
+      </div>
+    } @else {
+      <div class="relative rounded-2xl border border-slate-200">
+        <div class="overflow-visible">
+          <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Username</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Permissions</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Roles</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Last Active</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Date Added</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+              @for (user of paginatedUsers(); track user.id) {
+                <tr class="transition hover:bg-slate-50/80">
+                  <td class="px-4 py-3.5 text-sm font-medium text-slate-900">{{ user.username }}</td>
+                  <td class="px-4 py-3.5">
+                    <div class="flex flex-wrap gap-1.5">
+                      @for (permission of user.permissions; track permission) {
+                        <app-tag [color]="getPermissionColor(permission)">{{ permission }}</app-tag>
+                      }
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="flex flex-wrap gap-1.5">
+                      @for (role of user.roles; track role) {
+                        <app-tag [color]="getRoleColor(role)">{{ role }}</app-tag>
+                      }
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5 text-sm text-slate-600">{{ formatLastActiveAt(user.lastActiveAt) }}</td>
+                  <td class="px-4 py-3.5 text-sm text-slate-600">{{ formatCreatedAt(user.createdAt) }}</td>
+                  <td class="px-4 py-3.5 text-center">
+                    <app-dropdown-menu>
+                      <app-dropdown-item (click)="viewUserProfile(user.id)">
+                        <i class="fa-solid fa-user text-xs"></i>
+                        View profile
+                      </app-dropdown-item>
+                      <app-dropdown-item (click)="editUser(user.id)">
+                        <i class="fa-solid fa-user-gear text-xs"></i>
+                        Edit permissions
+                      </app-dropdown-item>
+                      <app-dropdown-divider></app-dropdown-divider>
+                      <app-dropdown-item [danger]="true" (click)="deleteUser(user)">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                        Delete user
+                      </app-dropdown-item>
+                    </app-dropdown-menu>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                      <li nz-menu-item (click)="editUser(data.id)">
-                        <i nz-icon nzType="edit"></i>
-                        <span i18n>Edit permissions</span>
-                      </li>
+      <app-pagination
+        [totalItems]="filteredUsers().length"
+        [totalPages]="totalPages()"
+        [currentPage]="currentPage()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="pageSizeOptions"
+        (pageChange)="setPage($event)"
+        (pageSizeChange)="setPageSize($event)"></app-pagination>
+    }
+  </app-card>
+</div>
 
-                      <li nz-menu-divider></li>
-
-                      <li nz-menu-item nzDanger (click)="deleteUser(data.id)">
-                        <i nz-icon nzType="delete"></i>
-                        <span i18n>Delete user</span>
-                      </li>
-                  </ul>
-                </nz-dropdown-menu>
-              </td>
-
-            </tr>
-          }
-
-        </tbody>
-
-      </nz-table>
-    </nz-content>
-
-
-  </nz-layout>
-</nz-layout>
-
-
+<app-confirm-modal
+  [visible]="deleteModalVisible()"
+  title="Delete user?"
+  [content]="deleteMessage()"
+  okText="Delete"
+  cancelText="Cancel"
+  [danger]="true"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()"></app-confirm-modal>

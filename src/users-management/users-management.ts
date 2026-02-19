@@ -1,102 +1,199 @@
-import { Component, computed, inject, signal } from "@angular/core";
-import { NzBreadCrumbModule } from "ng-zorro-antd/breadcrumb";
-import { NzIconModule } from "ng-zorro-antd/icon";
-import { NzLayoutModule } from "ng-zorro-antd/layout";
-import { NzPageHeaderModule } from "ng-zorro-antd/page-header";
-import { NzTableModule } from "ng-zorro-antd/table";
-import { UserService } from "../services/user.service";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { NzTagModule } from "ng-zorro-antd/tag";
-import { NgClass } from "@angular/common";
-import { PERMISSION_COLORS } from "../shared/constants/permissions.constants";
-import { NzDropdownModule } from "ng-zorro-antd/dropdown";
-import { NzMenuModule } from "ng-zorro-antd/menu";
-import { ROLES_COLORS } from "../shared/constants/roles.constans";
-import { UserModel } from "../models/user.model";
-import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
-import { NzTypographyModule } from "ng-zorro-antd/typography";
-import { NzSpaceModule } from "ng-zorro-antd/space";
-import { NzGridModule } from "ng-zorro-antd/grid";
-import { NzFlexModule } from "ng-zorro-antd/flex";
-import { NzAutocompleteModule } from "ng-zorro-antd/auto-complete";
-
-import { FormsModule } from "@angular/forms";
-import { NzInputModule } from "ng-zorro-antd/input";
-
-
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { UserModel } from '../models/user.model';
+import { UserService } from '../services/user.service';
+import { Card } from '../shared/components/card/card';
+import { ConfirmModal } from '../shared/components/confirm-modal/confirm-modal';
+import {
+  DropdownDivider,
+  DropdownItem,
+  DropdownMenu,
+} from '../shared/components/dropdown-menu/dropdown-menu';
+import { PageHeader } from '../shared/components/page-header/page-header';
+import { Pagination } from '../shared/components/pagination/pagination';
+import { Tag } from '../shared/components/tag/tag';
+import { PERMISSION_COLORS } from '../shared/constants/permissions.constants';
+import { ROLES_COLORS } from '../shared/constants/roles.constans';
+import { ToastService } from '../shared/services/toast.service';
 
 @Component({
   selector: 'users-management',
+  standalone: true,
   imports: [
-    NzLayoutModule,
-    NzPageHeaderModule,
-    NzBreadCrumbModule,
-    NzIconModule,
-    NzTableModule,
-    NzTagModule,
-    NgClass,
-    NzDropdownModule,
-    NzMenuModule,
-    NzDescriptionsModule,
-    NzTypographyModule,
-    NzSpaceModule,
-    NzGridModule,
-    NzFlexModule,
-    NzAutocompleteModule,
-    NzInputModule,
-    FormsModule
-],
+    PageHeader,
+    Card,
+    Tag,
+    DropdownMenu,
+    DropdownItem,
+    DropdownDivider,
+    ConfirmModal,
+    Pagination,
+  ],
   templateUrl: './users-management.html',
   styleUrl: './users-management.css',
 })
 export class UsersManagement {
-  listOfCurrentPageUsers: readonly UserModel[] = [];
+  private readonly userService = inject(UserService);
+  private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
+  private readonly dateTimeFormatter = new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
 
-  private userService = inject(UserService);
+  readonly users = signal<UserModel[]>([]);
+  readonly loading = signal(false);
+  readonly inputValue = signal('');
 
-  protected users = toSignal(this.userService.getAll(), { initialValue: [] });
-  loading = signal(false);
-  inputValue = signal('');
-  protected options= computed(()=>{
-    const query = this.inputValue().toLocaleLowerCase().trim();
-    if(!query) return [];
-    return this.users()
-            .filter(user => user.username.toLocaleLowerCase().includes(query))
-            .map(user => user.username);
-  })
+  readonly currentPage = signal(1);
+  readonly pageSize = signal(10);
+  readonly pageSizeOptions = [5, 10, 20, 50];
+
+  readonly deleteTarget = signal<UserModel | null>(null);
+  readonly deleteSubmitting = signal(false);
 
   readonly permissionColors = PERMISSION_COLORS;
   readonly rolesColors = ROLES_COLORS;
-  readonly pageSizeOptions = [5, 10, 20, 50];
 
-  getPermissionColor(perm: string): string {
-    return this.permissionColors[perm] || 'default';
+  readonly filteredUsers = computed(() => {
+    const query = this.inputValue().toLocaleLowerCase().trim();
+    if (!query) {
+      return this.users();
+    }
+    return this.users().filter((user) => user.username.toLocaleLowerCase().includes(query));
+  });
+
+  readonly totalPages = computed(() => {
+    const pages = Math.ceil(this.filteredUsers().length / this.pageSize());
+    return Math.max(1, pages);
+  });
+
+  readonly paginatedUsers = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredUsers().slice(start, start + this.pageSize());
+  });
+
+  readonly deleteModalVisible = computed(() => this.deleteTarget() !== null);
+  readonly deleteMessage = computed(() => {
+    const user = this.deleteTarget();
+    if (!user) {
+      return '';
+    }
+    return `This will permanently remove "${user.username}" and cannot be undone.`;
+  });
+
+  constructor() {
+    this.loadUsers();
+
+    effect(() => {
+      const totalPages = this.totalPages();
+      const current = this.currentPage();
+      if (current > totalPages) {
+        this.currentPage.set(totalPages);
+      }
+    });
   }
+
+  loadUsers(): void {
+    this.loading.set(true);
+    this.userService.getAll().subscribe({
+      next: (users) => {
+        this.users.set(users);
+        this.loading.set(false);
+      },
+      error: (err: Error) => {
+        this.toast.error(err.message || 'Failed to load users');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  onSearchChange(value: string): void {
+    this.inputValue.set(value);
+    this.currentPage.set(1);
+  }
+
+  setPage(page: number): void {
+    const nextPage = Math.min(Math.max(page, 1), this.totalPages());
+    this.currentPage.set(nextPage);
+  }
+
+  setPageSize(size: number): void {
+    this.pageSize.set(size);
+    this.currentPage.set(1);
+  }
+
+  getPermissionColor(permission: string): string {
+    return this.permissionColors[permission] || 'default';
+  }
+
   getRoleColor(role: string): string {
     return this.rolesColors[role] || 'default';
   }
 
-  // Acción para editar
+  formatCreatedAt(value: Date | null): string {
+    if (!value) {
+      return '—';
+    }
+    return this.cleanDateLabel(this.dateTimeFormatter.format(value));
+  }
+
+  formatLastActiveAt(value: Date | null): string {
+    if (!value) {
+      return '—';
+    }
+    return this.cleanDateLabel(this.dateTimeFormatter.format(value));
+  }
+
+  navigateToCreate(): void {
+    this.router.navigate(['/users/create']);
+  }
+
   editUser(id: number): void {
-    console.log('Abriendo edición para:', id);
-    // Aquí podrías disparar un Modal de NG-ZORRO
+    this.router.navigate(['/users/edit', id]);
   }
+
   viewUserProfile(id: number): void {
-    console.log('Abriendo información para:', id);
-  }
-  deleteUser(id: number): void {
-    console.log('Eliminando información para:', id);
+    this.editUser(id);
   }
 
-  onCurrentPageDataChange(listOfCurrentPageData: readonly UserModel[]): void {
-    this.listOfCurrentPageUsers = listOfCurrentPageData;
-    this.refreshCheckedStatus();
+  deleteUser(user: UserModel): void {
+    this.deleteTarget.set(user);
   }
 
-  refreshCheckedStatus(): void {}
+  cancelDelete(): void {
+    this.deleteTarget.set(null);
+    this.deleteSubmitting.set(false);
+  }
 
-  onInput(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.inputValue.set(value);
+  confirmDelete(): void {
+    if (this.deleteSubmitting()) {
+      return;
+    }
+    const user = this.deleteTarget();
+    if (!user) {
+      return;
+    }
+
+    this.deleteSubmitting.set(true);
+    this.userService.delete(user.id).subscribe({
+      next: () => {
+        this.users.update((list) => list.filter((item) => item.id !== user.id));
+        this.toast.success(`User "${user.username}" deleted successfully`);
+        this.cancelDelete();
+      },
+      error: (err: Error) => {
+        this.toast.error(err.message || 'Failed to delete user');
+        this.deleteSubmitting.set(false);
+      },
+    });
+  }
+
+  private cleanDateLabel(value: string): string {
+    return value.replace(/\./g, '').toLowerCase();
   }
 }

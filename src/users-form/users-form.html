@@ -1,0 +1,86 @@
+<app-page-header
+  [title]="isEditMode() ? 'Edit User' : 'Create User'"
+  [subtitle]="isEditMode()
+    ? 'Update account data, roles, and permissions.'
+    : 'Create a new account and assign access levels.'"
+  [showBack]="true"
+  (back)="goBack()"></app-page-header>
+
+<div class="px-4 pb-8 sm:px-6">
+  <app-card [narrow]="true" [loading]="loading()">
+    <form [formGroup]="validateForm" (ngSubmit)="submitForm()" class="space-y-6">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="space-y-2">
+          <label for="username" class="block text-sm font-medium text-slate-700">Username</label>
+          <input
+            id="username"
+            type="text"
+            formControlName="username"
+            placeholder="e.g. user_1"
+            class="w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400"
+            [class.border-red-300]="isInvalid('username')"
+            [class.ring-2]="isInvalid('username')"
+            [class.ring-red-100]="isInvalid('username')"
+            [class.border-slate-300]="!isInvalid('username')"
+            [class.focus:border-primary-400]="!isInvalid('username')"
+            [class.focus:ring-primary-100]="!isInvalid('username')" />
+          @if (isInvalid('username')) {
+            <p class="text-xs font-medium text-red-600">Username is required.</p>
+          }
+        </div>
+
+        @if (!isEditMode()) {
+          <div class="space-y-2">
+            <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              placeholder="********"
+              class="w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400"
+              [class.border-red-300]="isInvalid('password')"
+              [class.ring-2]="isInvalid('password')"
+              [class.ring-red-100]="isInvalid('password')"
+              [class.border-slate-300]="!isInvalid('password')"
+              [class.focus:border-primary-400]="!isInvalid('password')"
+              [class.focus:ring-primary-100]="!isInvalid('password')" />
+            @if (isInvalid('password')) {
+              <p class="text-xs font-medium text-red-600">Password is required for new users.</p>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-slate-700">Roles</label>
+        <app-multi-select formControlName="roles" [options]="roleOptions" placeholder="Select roles"></app-multi-select>
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-slate-700">Permissions</label>
+        <app-multi-select
+          formControlName="permissions"
+          [options]="permissionOptions"
+          placeholder="Select permissions"></app-multi-select>
+      </div>
+
+      <div class="flex flex-wrap justify-end gap-3 border-t border-slate-200 pt-5">
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+          (click)="goBack()">
+          <i class="fa-solid fa-arrow-left text-xs"></i>
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white
+                 shadow-sm shadow-primary-700/30 transition hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="validateForm.invalid || submitting()">
+          <i class="fa-solid" [class.fa-floppy-disk]="isEditMode()" [class.fa-user-plus]="!isEditMode()"></i>
+          {{ submitting() ? (isEditMode() ? 'Updating...' : 'Creating...') : (isEditMode() ? 'Update User' : 'Create User') }}
+        </button>
+      </div>
+    </form>
+  </app-card>
+</div>

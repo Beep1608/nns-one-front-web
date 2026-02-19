@@ -1,3 +1,42 @@
-#app-root{
+:host {
+  display: block;
+}
 
+.sidebar-shell {
+  width: 18rem;
+}
+
+.layout-shell {
+  transition: padding-left 0.25s ease;
+}
+
+@media (min-width: 1024px) {
+  .sidebar-shell {
+    width: 18rem;
+    transition: width 0.25s ease;
+  }
+
+  .layout-shell {
+    padding-left: 18rem;
+  }
+
+  .sidebar-collapsed .sidebar-shell {
+    width: 5rem;
+  }
+
+  .sidebar-collapsed .layout-shell {
+    padding-left: 5rem;
+  }
+
+  .sidebar-collapsed .sidebar-brand-copy,
+  .sidebar-collapsed .sidebar-footer-copy,
+  .sidebar-collapsed .nav-label {
+    display: none;
+  }
+
+  .sidebar-collapsed .nav-link {
+    justify-content: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
 }

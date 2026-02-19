@@ -1,2 +1,101 @@
-<router-outlet></router-outlet>
+<div class="relative min-h-screen overflow-x-hidden bg-slate-100 text-slate-800" [class.sidebar-collapsed]="isSidebarCollapsed()">
+  <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(14,116,144,0.14),_transparent_38%),radial-gradient(circle_at_80%_80%,_rgba(245,158,11,0.18),_transparent_42%)]">
+  </div>
 
+  <div class="pointer-events-none absolute -right-32 top-[-8rem] -z-10 h-[28rem] w-[28rem] rounded-full bg-cyan-300/25 blur-3xl">
+  </div>
+  <div class="pointer-events-none absolute -left-20 bottom-[-8rem] -z-10 h-[24rem] w-[24rem] rounded-full bg-amber-300/20 blur-3xl">
+  </div>
+
+  <div
+    class="fixed inset-0 z-30 bg-slate-900/45 backdrop-blur-sm transition-opacity lg:hidden"
+    [class.opacity-100]="isMobileMenuOpen()"
+    [class.pointer-events-none]="!isMobileMenuOpen()"
+    [class.opacity-0]="!isMobileMenuOpen()"
+    (click)="closeMobileNav()"></div>
+
+  <aside
+    class="sidebar-shell fixed inset-y-0 left-0 z-40 border-r border-white/10 bg-gradient-to-b from-slate-950 via-slate-900 to-cyan-950
+           text-slate-100 shadow-2xl transition-transform duration-300 ease-out lg:translate-x-0"
+    [class.translate-x-0]="isMobileMenuOpen()"
+    [class.-translate-x-full]="!isMobileMenuOpen()">
+    <div class="flex h-full flex-col">
+      <div class="border-b border-white/10 px-5 py-5">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-cyan-200">
+            <i class="fa-solid fa-store text-lg"></i>
+          </div>
+          <div class="sidebar-brand-copy">
+            <p class="text-sm font-semibold tracking-wide text-white">Punto de Venta</p>
+            <p class="text-xs text-slate-300">Operations Console</p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="flex-1 space-y-1 px-3 py-5">
+        <a
+          routerLink="/products"
+          routerLinkActive="bg-white/15 text-white shadow-inner shadow-cyan-900/35"
+          class="nav-link group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+          (click)="closeMobileNav()">
+          <i class="fa-solid fa-box-open w-4 text-center text-cyan-300"></i>
+          <span class="nav-label">Products</span>
+        </a>
+
+        <a
+          routerLink="/users"
+          routerLinkActive="bg-white/15 text-white shadow-inner shadow-cyan-900/35"
+          class="nav-link group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+          (click)="closeMobileNav()">
+          <i class="fa-solid fa-users w-4 text-center text-cyan-300"></i>
+          <span class="nav-label">Users</span>
+        </a>
+      </nav>
+
+      <div class="border-t border-white/10 px-5 py-4">
+        <p class="sidebar-footer-copy text-xs text-slate-300/90">Use the menu to manage inventory and user access.</p>
+      </div>
+    </div>
+  </aside>
+
+  <div class="relative layout-shell">
+    <header class="sticky top-0 z-20 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
+      <div class="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between px-4 sm:px-6">
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-100 lg:hidden"
+            (click)="isMobileMenuOpen.set(true)">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+
+          <button
+            type="button"
+            class="hidden h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-100 lg:inline-flex"
+            (click)="toggleSidebar()">
+            @if (isSidebarCollapsed()) {
+              <i class="fa-solid fa-angles-right"></i>
+            } @else {
+              <i class="fa-solid fa-angles-left"></i>
+            }
+          </button>
+
+          <div class="hidden sm:block">
+            <p class="text-sm font-semibold text-slate-800">{{ title() }}</p>
+            <p class="text-xs text-slate-500">Inventory and user administration</p>
+          </div>
+        </div>
+
+        <div class="inline-flex items-center rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-700">
+          Live Workspace
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-[1400px] pb-8">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <app-toast-container></app-toast-container>
+</div>

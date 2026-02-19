@@ -9,8 +9,10 @@
   "projects": {
     "punto-venta-web": {
       "i18n": {
-        "sourceLocale":"en-US",
-        "locales": {"es-MX":"src/locale/messages.es.json"}
+        "sourceLocale": "en-US",
+        "locales": {
+          "es-MX": "src/locale/messages.es.json"
+        }
       },
       "projectType": "application",
       "schematics": {},
@@ -21,18 +23,10 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "localize":true,
+            "localize": true,
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
-                "output": "/assets/"
-              }
-            ],
             "styles": [
-              "./node_modules/ng-zorro-antd/ng-zorro-antd.min.css",
               "src/styles.css"
             ],
             "server": "src/main.server.ts",
@@ -64,7 +58,9 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
-              "localize": ["es-MX"],
+              "localize": [
+                "es-MX"
+              ],
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -77,6 +73,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "buildTarget": "punto-venta-web:build:production"
