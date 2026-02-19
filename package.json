@@ -2,6 +2,11 @@
   "name": "punto-venta-web",
   "version": "0.0.0",
   "scripts": {
+    "check:runtime": "node ./scripts/check-runtime.mjs",
+    "prestart": "npm run check:runtime",
+    "prebuild": "npm run check:runtime",
+    "prewatch": "npm run check:runtime",
+    "pretest": "npm run check:runtime",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
@@ -22,6 +27,10 @@
     ]
   },
   "private": true,
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || ^24.0.0",
+    "npm": ">=10 <12"
+  },
   "packageManager": "npm@11.6.2",
   "dependencies": {
     "@angular/common": "^21.1.0",
