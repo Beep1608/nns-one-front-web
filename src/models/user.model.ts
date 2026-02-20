@@ -3,6 +3,6 @@ export interface UserModel {
   username: string;
   createdAt: Date | null;
   lastActiveAt: Date | null;
-  permissions: string[];
+  // permissions: string[];
   roles: string[];
 }

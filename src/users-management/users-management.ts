@@ -56,7 +56,7 @@ export class UsersManagement {
   readonly deleteTarget = signal<UserModel | null>(null);
   readonly deleteSubmitting = signal(false);
 
-  readonly permissionColors = PERMISSION_COLORS;
+  // readonly permissionColors = PERMISSION_COLORS;
   readonly rolesColors = ROLES_COLORS;
 
   readonly filteredUsers = computed(() => {
@@ -127,9 +127,9 @@ export class UsersManagement {
     this.currentPage.set(1);
   }
 
-  getPermissionColor(permission: string): string {
-    return this.permissionColors[permission] || 'default';
-  }
+  // getPermissionColor(permission: string): string {
+  //   return this.permissionColors[permission] || 'default';
+  // }
 
   getRoleColor(role: string): string {
     return this.rolesColors[role] || 'default';

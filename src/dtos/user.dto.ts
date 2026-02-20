@@ -4,7 +4,7 @@ export interface UserDto {
   username: string;
   createdAt: string | null;
   lastActiveAt: string | null;
-  permissions?: string[] | Set<string>;
+  // permissions?: string[] | Set<string>;
   roles?: string[] | Set<string>;
   _links?: {
     self?: {

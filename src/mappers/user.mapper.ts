@@ -16,15 +16,14 @@ const MONTH_INDEX: Record<string, number> = {
   dic: 11,
 };
 
-export class UserMapper
-{
-  static fromDto(dto: UserDto): UserModel{
+export class UserMapper {
+  static fromDto(dto: UserDto): UserModel {
     return {
       id: UserMapper.resolveId(dto),
       username: dto.username,
       createdAt: UserMapper.toDate(dto.createdAt),
       lastActiveAt: UserMapper.toDate(dto.lastActiveAt),
-      permissions: UserMapper.toList(dto.permissions),
+      // permissions: [], // Default to empty array to satisfy model if needed, or if model is commented out this line might error. Wait, if I comment out in model, I should remove it here too.
       roles: UserMapper.toList(dto.roles)
     };
   }

@@ -120,16 +120,16 @@ export class UserService {
     }
 
     for (const role of dto.roles || []) {
-      if (role.trim().length > 0) {
-        params = params.append('roles', role.trim());
+      if (role > 0) {
+        params = params.append('roles', role);
       }
     }
 
-    for (const permission of dto.permissions || []) {
-      if (permission.trim().length > 0) {
-        params = params.append('permissions', permission.trim());
-      }
-    }
+    //for (const permission of dto.permissions || []) {
+    //  if (permission.trim().length > 0) {
+    //    params = params.append('permissions', permission.trim());
+    //  }
+    //}
 
     return params.toString();
   }
